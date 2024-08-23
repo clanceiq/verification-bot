@@ -13,6 +13,7 @@ OUTPUT_CHANNEL_ID = int(values[3])
 CSV_FILE = values[4]
 BOT_ID = int(values[5])
 MY_ID = int(values[6])
+LOGGING_CHANNEL_ID = int(values[7])
 
 ## Initializing Bot
 intents = discord.Intents.default()
@@ -35,12 +36,20 @@ async def on_message(message):
     if (message.channel.id == CHANNEL_ID and message.author.id != BOT_ID): # Will only run if on the "verification" channel
         user = message.author
 
-        message_content = message.content
+        message_content = message.content.lower()
 
-    
+        # Loggging the Messages into a channel
+        logging_channel = client.get_channel(LOGGING_CHANNEL_ID)
+        embedVar = discord.Embed(title=user, description=message_content, color=0x9FC5E8)
+
+        await logging_channel.send(embed=embedVar)
+
         with open(CSV_FILE) as csv_file:
             registered = False
             csv_reader = csv.reader(csv_file)
+            foundations = False
+            academic_essentials = False
+            engg_camp = False
 
             rowindex = 0
             for row in csv_reader:
@@ -91,5 +100,11 @@ async def on_message(message):
                 output_channel = client.get_channel(OUTPUT_CHANNEL_ID)
                 await output_channel.send(f"{user.mention} " + output_message)
     
-        
+
+@client.command()
+async def terminate(ctx):
+    await ctx.send("Terminating...")
+    await client.logout()
+
+
 client.run(TOKEN)
